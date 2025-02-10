@@ -2,7 +2,7 @@ version: "3.7"
 services:
   fastapi:
     build:
-      context: ./fastapiService
+      context: manually_instrumented_fastapi_service
     ports:
       - "8000:8000"
     networks:
@@ -10,7 +10,7 @@ services:
     command:
       ["tail", "-f", "/dev/null"]
     volumes:
-      - ./fastapiService/fastapiservice:/app/fastapiService
+      - ./manually_instrumented_fastapi_service/fastapiservice:/app/manually_instrumented_fastapi_service
 
   collector:
     image: otel/opentelemetry-collector:latest

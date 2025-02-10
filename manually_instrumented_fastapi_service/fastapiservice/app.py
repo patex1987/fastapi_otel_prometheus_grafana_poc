@@ -48,8 +48,8 @@ FastAPIInstrumentor.instrument_app(app)
 # Example endpoint
 @app.get("/")
 async def read_root():
-    #import pudb
-    #pudb.set_trace()
+    import pudb
+    pudb.set_trace()
     print(__file__)
     time.sleep(random.randint(2,5))
     return {"message": "Hello, OpenTelemetry!"}

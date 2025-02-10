@@ -26,7 +26,7 @@ RUN poetry config virtualenvs.create false \
 
 # Copy the rest of the application code
 COPY . .
-WORKDIR /app/fastapiService
+WORKDIR /app/manually_instrumented_fastapi_service/
 
 # Expose the FastAPI application port
 EXPOSE 8000
