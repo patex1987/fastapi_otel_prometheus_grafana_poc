@@ -1,9 +1,9 @@
 import pudb
 
-from manually_instrumented_fastapi_service.fastapiservice.api.v1.routes.dummy_routes import dummy_router
-from manually_instrumented_fastapi_service.fastapiservice.api.v1.routes.throttle_optimization import throttle_router
+from fastapiservice.api.v1.routes.dummy_routes import dummy_router
+from fastapiservice.api.v1.routes.throttle_optimization import throttle_router
 
-pudb.set_trace()
+# pudb.set_trace()
 
 import fastapi
 
@@ -48,3 +48,4 @@ def create_app():
     instrument_for_telemetry(app)
 
     return app
+

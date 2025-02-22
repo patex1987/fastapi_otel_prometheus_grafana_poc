@@ -26,11 +26,11 @@ RUN poetry config virtualenvs.create false \
 
 # Copy the rest of the application code
 COPY . .
-WORKDIR /app/manually_instrumented_fastapi_service/
+#WORKDIR /app/fastapiservice
 
 # Expose the FastAPI application port
 EXPOSE 8000
 
 # Run the FastAPI application with Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
+CMD ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
 #CMD ["tail", "-f", "/dev/null"]

@@ -4,16 +4,16 @@ for getting from point A to point B
 """
 
 from fastapi import APIRouter
-
+from pydantic import BaseModel
 
 throttle_router = APIRouter()
 
 
-class GAResponse:
+class GAResponse(BaseModel):
     pass
 
 
-class GARequest:
+class GARequest(BaseModel):
     pass
 
 
