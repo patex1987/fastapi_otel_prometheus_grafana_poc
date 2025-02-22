@@ -1,36 +1,36 @@
-# Use the official Python 3.12 slim base image
-FROM python:3.12-slim
+# Stage 1: Base
+FROM python:3.12-slim AS base
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies including htop and curl (required for Poetry installation)
 RUN apt-get update && apt-get install -y \
     htop \
     curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
+# install and add poetry to the path
 RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Add Poetry to PATH
 ENV PATH="/root/.local/bin:$PATH"
 
-# Copy only the dependency files to leverage Docker caching
 COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false
 
-# Install dependencies using Poetry
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-root --only main \
-    && poetry run opentelemetry-bootstrap -a install
-
-# Copy the rest of the application code
+# Stage 3: Development Build
+FROM base AS development
+# Install only runtime dependencies and skip installing the app package,
+# so that mounted code (if any) takes effect.
+RUN poetry install --no-interaction --no-root
 COPY . .
-#WORKDIR /app/fastapiservice
-
-# Expose the FastAPI application port
 EXPOSE 8000
+CMD ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
-# Run the FastAPI application with Uvicorn
-CMD ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug"]
-#CMD ["tail", "-f", "/dev/null"]
+# Stage 2: Production Build
+FROM base AS production
+# Install all dependencies and install the app itself
+RUN poetry install --no-interaction --only main
+COPY . .
+EXPOSE 8000
+# TODO: use app factory
+CMD ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000"]
+
+

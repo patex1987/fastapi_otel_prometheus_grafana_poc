@@ -3,7 +3,7 @@ services:
   fastapi:
     build:
       context: manually_instrumented_fastapi_service
-      dockerfile: multistage.Dockerfile
+      dockerfile: Dockerfile
       target: development
     environment:
       - ENV=development

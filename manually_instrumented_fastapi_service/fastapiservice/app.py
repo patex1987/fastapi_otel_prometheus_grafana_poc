@@ -30,7 +30,7 @@ def instrument_for_telemetry(app: fastapi.FastAPI):
 
     set_tracer_provider(TracerProvider())
     tracer_provider: TracerProvider = get_tracer_provider()
-    tracer = tracer_provider.get_tracer(__name__)
+    # tracer = tracer_provider.get_tracer(__name__)
 
     otlp_span_exporter = OTLPSpanExporter()
     span_processor = BatchSpanProcessor(otlp_span_exporter)
@@ -48,4 +48,3 @@ def create_app():
     instrument_for_telemetry(app)
 
     return app
-
