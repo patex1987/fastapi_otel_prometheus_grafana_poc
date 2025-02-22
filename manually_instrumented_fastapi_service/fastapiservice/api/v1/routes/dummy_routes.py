@@ -1,6 +1,7 @@
 """
 Dummy api routes to demonstrate the code instrumentation
 """
+
 import random
 import time
 
@@ -9,13 +10,15 @@ from fastapi.routing import APIRouter
 
 dummy_router = APIRouter()
 
+
 # Example endpoint
 @dummy_router.get("/")
 async def read_root():
     import pudb
+
     pudb.set_trace()
     print(__file__)
-    time.sleep(random.randint(2,5))
+    time.sleep(random.randint(2, 5))
     return {"message": "Hello, OpenTelemetry!"}
 
 
@@ -23,7 +26,7 @@ async def read_root():
 async def slow():
     time.sleep(random.randint(10, 15))
     random_payload = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=100))
-    return {"message": "Hello, OpenTelemetry!",  "payload": random_payload}
+    return {"message": "Hello, OpenTelemetry!", "payload": random_payload}
 
 
 @dummy_router.get("/not-working")
@@ -31,7 +34,7 @@ async def not_working():
     # time.sleep(random.randint(10, 15))
     random_payload = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=100))
     raise ValueError('something went wrong')
-    return {"message": "Hello, OpenTelemetry!",  "payload": random_payload}
+    return {"message": "Hello, OpenTelemetry!", "payload": random_payload}
 
 
 @dummy_router.get("/call-with-httpx")
