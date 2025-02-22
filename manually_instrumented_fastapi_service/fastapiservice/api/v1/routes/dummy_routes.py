@@ -14,10 +14,10 @@ dummy_router = APIRouter()
 # Example endpoint
 @dummy_router.get("/")
 async def read_root():
-    import pudb
-
-    pudb.set_trace()
-    print(__file__)
+    # import pudb
+    #
+    # pudb.set_trace()
+    # print(__file__)
     time.sleep(random.randint(2, 5))
     return {"message": "Hello, OpenTelemetry!"}
 
