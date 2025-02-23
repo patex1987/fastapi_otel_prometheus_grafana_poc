@@ -1,15 +1,17 @@
 flowchart LR
-    subgraph "Docker Compose Environment"
-      FA[Manually Instrumented FastAPI Service]
-      OC[Otel Collector]
-      P[Prometheus]
-      T[Tempo]
-      G[Grafana]
-    end
 
-    FA -- "sends metrics" --> OC
-    FA -- "sends traces" --> OC
-    OC -- "forwards metrics" --> P
-    OC -- "forwards traces" --> T
-    P -- "visualizes metrics" --> G
-    T -- "visualizes traces" --> G
+      FA[Manually Instrumented FastAPI Service]
+      subgraph Observability
+          OC[Otel Collector]
+          P[Prometheus]
+          T[Tempo]
+          G[Grafana]
+      end
+
+
+    FA -- "metrics" --> OC
+    FA -- "traces" --> OC
+    OC -- "metrics" --> P
+    OC -- "traces" --> T
+    P <-- "metrics" --> G
+    T <-- "traces" --> G
