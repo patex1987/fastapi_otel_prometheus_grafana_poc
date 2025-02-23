@@ -7,6 +7,8 @@ services:
       target: production
     environment:
       - ENV=production
+    env_file:
+      - ./configuration/manually_instrumented_fastapi_service/development.env
     ports:
       - "8000:8000"
     networks:
