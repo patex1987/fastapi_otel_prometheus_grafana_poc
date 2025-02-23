@@ -15,7 +15,7 @@ services:
       - monitoring
     command:
       # TODO: use app factory
-#      ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+      # ["uvicorn", "manage:entry_point", "--host", "0.0.0.0", "--port", "8000", "--reload"]
       ["tail", "-f", "/dev/null"]
     volumes:
       - ./manually_instrumented_fastapi_service/:/app/
