@@ -55,7 +55,7 @@ you can build a single service (fastapi in this case), useful if you need to reb
 docker compose -f docker-compose.yml -f docker-compose.dev.yml build fastapi
 ```
 
-or the whole stack
+or build the whole stack
 ```shell
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
@@ -78,13 +78,45 @@ grafana-1     | logger=settings t=2025-02-18T14:40:13.295341934Z level=info msg=
 ...
 ```
 
+In order to run the service
+ 
+- enter the container (the name of the container can be different): 
+```shell
+docker exec -it fastapi_otel_prometheus_grafana_poc-fastapi-1 /bin/bash
+```
+
+- execute the following command from inside the container:
+```shell
+uvicorn manage:entry_point --host 0.0.0.0 --port 8000 --reload
+```
+
+
+
 ### "Production" mode
+TBD
 
 ## Kubernetes
 There are some plans to wrap the service into a local kubernetes cluster (minikube or k3), however this might grow into a separate repository.
 This can be a useful setup to demonstrate how to debug python code in a cluster
 
 # Testing
+By default, the `manually_instrumented_fastapi_service`s port is forwarded to port 8000. So you can call the various endpoints of the service
+using curl or any other tool suited for the job (postman, programatically, ...)
+
+```shell
+curl -X POST -H "Content-Type: application/json"  -d "{}" http://127.0.0.1:8000/api/v1/throttle/run
+```
+
+```shell
+curl -X GET http://127.0.0.1:8000/api/v1/dummy/
+```
+
+```shell
+curl -X GET http://127.0.0.1:8000/api/v1/dummy/slow\?something\=10
+```
+
+# Debugging
+TBD
 
 
 # FAQ
@@ -95,3 +127,4 @@ In the future, I may deliver a decoupled solution in separate github repositorie
 But if you want to play around with the current solution, the FastAPI service can be easily configured to send telemetry to an external grafana stack
 
 ## Why do you need an opentelemetry collector for such a small project?
+TBD
