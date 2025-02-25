@@ -39,34 +39,38 @@ I would like to add multiple api services to this stack in the future:
 ## Docker compose
 
 ### Development mode
-In this mode the fastapi service(s) are not installed into their environments and uvicorn (asgi web server) is executed in a hot reload mode.
-The code from your host is volume mapped into the container. So every time you edit something on your laptop it gets reflected inside the container, and the api service gets restarted. (this is not needed if you install vim, helix into the container, or access the code through a remote development IDE)
-This mode is driven by the `docker-compose.dev.yml` file. This serves as an override for the main `docker-compose.yml` file. 
-It overrides the following aspects:
-- builds the docker file of the service with the development target (the package itself is not installed into python environment, i.e. `--no-root` - among other things)
-- volume mapping: this ensures that your locally developed code is reflected in the container
-- command: currently it executes the container with no running python process `["tail", "-f", "/dev/null"]`. So one can enter the container and manually invoke the service or explore the code interactively
 
-So in order to run the service in development mode:
+In this mode, the FastAPI service(s) are not installed into their environments, and Uvicorn (the ASGI web server) is executed in hot reload mode. The code from your host is volume-mapped into the container, so every time you edit something on your laptop, it is reflected inside the container and the API service is restarted. (This is not needed if you install editors like Vim or Helix into the container, or if you access the code through a remote development IDE.)
 
-**build**
-you can build a single service (fastapi in this case), useful if you need to rebuild a single container before running the stack
+This mode is driven by the `docker-compose.dev.yml` file, which serves as an override for the main `docker-compose.yml` file. It overrides the following aspects:
+
+- **Build:** Builds the Dockerfile of the service with the development target (the package itself is not installed into the Python environment, i.e., using `--no-root`, among other things).
+- **Volume Mapping:** Ensures that your locally developed code is reflected in the container.
+- **Command:** Currently, the container executes no running Python process (`["tail", "-f", "/dev/null"]`), so you can enter the container and manually invoke the service or explore the code interactively.
+
+
+#### Build
+
+You can build a single service (FastAPI in this case), which is useful if you need to rebuild a single container before running the stack:
+
 ```shell
 docker compose -f docker-compose.yml -f docker-compose.dev.yml build fastapi
 ```
 
-or build the whole stack
+Or build the whole stack:
 ```shell
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-**spin up the compose stack**
+
+Spin Up the Compose Stack
 ```shell
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-Afterwards it should start up and you should see the logs from all containers:
-```shell
+
+Afterward, the stack should start up and you should see the logs from all containers:
+```text
  ✔ Container fastapi_otel_prometheus_grafana_poc-grafana-1     Created                                                                                                               0.0s 
  ✔ Container fastapi_otel_prometheus_grafana_poc-prometheus-1  Created                                                                                                               0.0s 
  ✔ Container fastapi_otel_prometheus_grafana_poc-collector-1   Created                                                                                                               0.0s 
@@ -78,22 +82,71 @@ grafana-1     | logger=settings t=2025-02-18T14:40:13.295341934Z level=info msg=
 ...
 ```
 
-In order to run the service
- 
-- enter the container (the name of the container can be different): 
+#### Running the Service
+
+Enter the Container (Note: The container name may be different.)
 ```shell
 docker exec -it fastapi_otel_prometheus_grafana_poc-fastapi-1 /bin/bash
 ```
 
-- execute the following command from inside the container:
+From inside the container, execute:
 ```shell
 uvicorn manage:entry_point --host 0.0.0.0 --port 8000 --reload
 ```
 
+This is necessary because we set the Docker command to ["tail", "-f", "/dev/null"], meaning the application doesn't start automatically with the container. This setup is useful when you want to own the shell session and debug the code with a command-line debugger (which will be shown later).
+
 
 
 ### "Production" mode
-TBD
+Disclaimer: This is not a real production mode, but try to imagine it is.
+
+In this mode, the FastAPI service(s) are installed into the Python environment, and there is no hot reloading or volume mapping involved. Therefore, the code you start with remains in the container (unless you edit the code inside the container). This mode is driven by the `docker-compose.yml` file.
+
+So in order to run the service in production mode:
+
+**build**
+you can build a single service (FastAPI in this case), which is useful if you need to rebuild a single container before running the stack.
+
+```shell
+docker compose build fastapi
+```
+
+or build the whole stack
+```shell
+docker compose up --build
+```
+
+**spin up the compose stack**
+```shell
+docker compose up
+```
+
+Afterwards it should start up and you should see the logs from all containers:
+```shell
+docker compose up
+WARN[0000] /home/patex1987/development/fastapi_otel_prometheus_grafana_poc/docker-compose.yml: `version` is obsolete 
+[+] Running 7/7
+ ✔ Network fastapi_otel_prometheus_grafana_poc_monitoring      Created                                             0.1s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-prometheus-1  Created                                             0.2s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-collector-1   Created                                             0.2s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-fastapi-1     Created                                             0.1s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-init-1        Created                                             0.2s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-grafana-1     Created                                             0.2s 
+ ✔ Container fastapi_otel_prometheus_grafana_poc-tempo-1       Created                                             0.1s 
+Attaching to collector-1, fastapi-1, grafana-1, init-1, prometheus-1, tempo-1
+grafana-1     | logger=settings t=2025-02-25T06:29:39.159871505Z level=info msg="Starting Grafana" version=11.5.2 commit=598e0338d5374d6bc404b02a58094132c5eeceb8 branch=HEAD compiled=2025-02-25T06:29:39Z
+...
+fastapi-1     | WARNING:  ASGI app factory detected. Using it, but please consider setting the --factory flag explicitly.
+fastapi-1     | INFO:     Started server process [1]
+fastapi-1     | INFO:     Waiting for application startup.
+fastapi-1     | INFO:     Application startup complete.
+fastapi-1     | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+As you can see this time the fastapi service started together with the stack
+
+
 
 ## Kubernetes
 There are some plans to wrap the service into a local kubernetes cluster (minikube or k3), however this might grow into a separate repository.
@@ -102,6 +155,10 @@ This can be a useful setup to demonstrate how to debug python code in a cluster
 # Testing
 By default, the `manually_instrumented_fastapi_service`s port is forwarded to port 8000. So you can call the various endpoints of the service
 using curl or any other tool suited for the job (postman, programatically, ...)
+
+## Manual testing
+
+use curl, postman, hurl, or any other tool to call the endpoints:
 
 ```shell
 curl -X POST -H "Content-Type: application/json"  -d "{}" http://127.0.0.1:8000/api/v1/throttle/run
@@ -114,6 +171,12 @@ curl -X GET http://127.0.0.1:8000/api/v1/dummy/
 ```shell
 curl -X GET http://127.0.0.1:8000/api/v1/dummy/slow\?something\=10
 ```
+
+## Unit tests
+TBD - we don't have unit tests yet, but we should have them :)
+
+## Integration testing
+TBD - we don't have integration tests yet, but we should have them :)
 
 # Debugging
 TBD
