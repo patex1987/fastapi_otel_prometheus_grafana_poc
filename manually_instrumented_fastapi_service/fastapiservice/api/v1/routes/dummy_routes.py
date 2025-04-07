@@ -6,6 +6,7 @@ import random
 import time
 
 import httpx
+from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
 dummy_router = APIRouter()
@@ -31,6 +32,15 @@ async def slow():
 
 @dummy_router.get("/not-working")
 async def not_working():
+    # time.sleep(random.randint(10, 15))
+    random_payload = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=100))
+    # raise ValueError('something went wrong')
+    # return {"message": "Hello, OpenTelemetry!", "payload": random_payload}
+    raise HTTPException(status_code=500, detail="Simulated failure")
+
+
+@dummy_router.get("/not-working-unhandled-exception")
+async def not_working_unhandled_exception():
     # time.sleep(random.randint(10, 15))
     random_payload = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=100))
     raise ValueError('something went wrong')
