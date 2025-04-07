@@ -43,3 +43,4 @@ def instrument_for_telemetry(app: fastapi.FastAPI):
     # instrument the desired packages
     instrument_fastapi(app)
     RequestsInstrumentor().instrument()
+    app.add_middleware(AlertMetricMiddleware)

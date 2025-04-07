@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     htop \
     curl \
+    vim \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # install and add poetry to the path
@@ -23,7 +24,7 @@ ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 FROM base AS development
 # Install only runtime dependencies and skip installing the app package,
 # so that mounted code (if any) takes effect.
-RUN poetry install --no-interaction --no-root
+RUN poetry install --no-interaction --no-root --with=dev
 COPY . .
 EXPOSE 8000
 
