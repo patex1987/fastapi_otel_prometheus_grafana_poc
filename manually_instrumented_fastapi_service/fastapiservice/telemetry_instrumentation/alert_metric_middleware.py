@@ -47,14 +47,18 @@ class AlertMetricMiddleware:
         instrumented_send = get_instrumented_send(send, scope, attributes)
         try:
             await self.app(scope, receive, instrumented_send)
+        except Exception as exc:
+            self.failure_requests.add(
+                1, attributes={'type': 'unhandled_exception', 'exception_class': exc.__class__.__name__}
+            )
+        #     raise exc
         finally:
             status_code = attributes.get('status_code')
-            if not status_code:
-                return
-            if 400 <= status_code < 500:
+            if status_code and 400 <= status_code < 500:
                 self.failure_requests.add(1, attributes={'type': '4xx'})
-            if 500 <= status_code < 600:
+            if status_code and 500 <= status_code < 600:
                 self.failure_requests.add(1, attributes={'type': '5xx'})
+
 
 def get_instrumented_send(send, scope, attributes):
 

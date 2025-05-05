@@ -2,6 +2,8 @@
 import logging
 
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
 
 from fastapiservice.api.v1.routes.dummy_routes import dummy_router
 from fastapiservice.api.v1.routes.throttle_optimization import throttle_router
@@ -26,7 +28,17 @@ def create_app():
     app.include_router(throttle_router, prefix='/api/v1/throttle', tags=["throttle"])
     instrument_for_telemetry(app)
 
+    app.add_exception_handler(Exception, exception_handler)
+    app.add_exception_handler(500, exception_handler)
+
     return app
+
+
+async def exception_handler(request: Request, exc: Exception) -> Response:
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"An error occurred: {exc.__class__.__name__}"},
+    )
 
 
 def instrument_for_telemetry(app: fastapi.FastAPI):
